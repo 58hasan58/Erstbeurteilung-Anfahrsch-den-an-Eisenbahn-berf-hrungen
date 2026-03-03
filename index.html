@@ -208,15 +208,14 @@ textarea:focus { border-color: #1a56db; }
     <table class="stbl" id="ST"></table>
   </div>
 
-  <!-- Single button: PDF download → then auto-open mail -->
-  <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px;margin-bottom:16px;font-size:14px;color:#166534;line-height:1.6;">
-    <strong>So funktioniert der Export:</strong><br>
-    1. PDF wird heruntergeladen<br>
-    2. Mail-App öffnet sich automatisch<br>
-    3. PDF manuell anhängen &amp; senden
+  <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px;margin-bottom:16px;font-size:14px;color:#166534;line-height:1.7;">
+    <strong>So weiterleiten:</strong><br>
+    1. PDF anzeigen &#8594; oben Teilen &#8594; &bdquo;In Dateien sichern&ldquo;<br>
+    2. Mail öffnen &#8594; PDF aus Dateien anhängen &amp; senden
   </div>
 
-  <button class="btn green" id="PB" onclick="exportAndMail()">&#128196; PDF laden &amp; Mail öffnen</button>
+  <button class="btn green" id="PB" onclick="makePDF()">&#128196; PDF anzeigen</button>
+  <button class="btn blue" id="MB" onclick="openMail()">&#9993; Mail öffnen</button>
   <button class="btn gray" onclick="show(5)">&#8592; Zurück / Fotos ergänzen</button>
   <button class="btn gray" onclick="neu()">&#128260; Neuen Einsatz starten</button>
 </div>
@@ -337,20 +336,17 @@ function buildSum(){
   document.getElementById('ST').innerHTML=h;
 }
 
-// ── Combined: PDF → then Mail ─────────────────────────────
-function exportAndMail() {
+// ── PDF (opens inline on iOS, that's normal) ─────────────
+function makePDF() {
   var btn = document.getElementById('PB');
   btn.disabled = true;
   document.getElementById('spinner').className = 'on';
   document.getElementById('spin-txt').textContent = 'PDF wird erstellt…';
 
-  if (window.jspdf && window.jspdf.jsPDF) {
-    runExport(btn);
-    return;
-  }
+  if (window.jspdf && window.jspdf.jsPDF) { runPDF(btn); return; }
   var s = document.createElement('script');
   s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-  s.onload = function() { runExport(btn); };
+  s.onload = function() { runPDF(btn); };
   s.onerror = function() {
     document.getElementById('spinner').className = '';
     btn.disabled = false;
@@ -359,15 +355,12 @@ function exportAndMail() {
   document.head.appendChild(s);
 }
 
-function runExport(btn) {
+function runPDF(btn) {
   setTimeout(function() {
     try {
       var t = getTS();
       var cfg = CFG[D.res] || { lbl:'-', m:[] };
       var nt = document.getElementById('NT').value.trim();
-      var filename = 'Anfahrschaden_'+new Date().toISOString().slice(0,10)+'.pdf';
-
-      // Build PDF
       var jsPDF = window.jspdf.jsPDF;
       var doc = new jsPDF({ unit:'mm', format:'a4' });
       var ML=18, CW=174, PH=297, y=0;
@@ -448,40 +441,42 @@ function runExport(btn) {
         doc.text('Seite '+pg+'/'+np2,192,PH-3,{align:'right'});
       }
 
-      // Save PDF
-      doc.save(filename);
-
-      // Update spinner text
-      document.getElementById('spin-txt').textContent = 'Mail wird geöffnet…';
-
-      // Open mail after short delay (let PDF save complete)
-      setTimeout(function() {
-        document.getElementById('spinner').className = '';
-        btn.disabled = false;
-        openMail(t, cfg, filename);
-      }, 1500);
-
+      doc.save('Anfahrschaden_'+new Date().toISOString().slice(0,10)+'.pdf');
+      document.getElementById('spinner').className='';
+      btn.disabled=false;
     } catch(err) {
-      document.getElementById('spinner').className = '';
-      btn.disabled = false;
+      document.getElementById('spinner').className='';
+      btn.disabled=false;
       alert('Fehler: '+err.message);
     }
   }, 100);
 }
 
-function openMail(t, cfg, filename) {
+// ── Mail (separate button, direct tap = iOS allows it) ────
+function openMail() {
+  var t = getTS();
+  var cfg = CFG[D.res] || { lbl:'-' };
   var subject = 'Erstbeurteilung Anfahrschaden EÜ – ' + t;
-  var body = 'Hallo,\n\n'
-    + 'anbei der Bericht zur Erstbeurteilung eines Anfahrschadens an einer Eisenbahnüberführung.\n\n'
-    + 'Datum:        ' + t + '\n'
-    + 'Bauwerksart:  ' + (D.bw||'-') + '\n'
-    + 'Bewertung:    ' + (cfg.lbl||'-') + '\n\n'
-    + 'Den vollständigen Bericht mit Fotos und Maßnahmen finden Sie in der angehängten PDF-Datei.\n\n'
-    + 'Bitte die PDF-Datei "' + filename + '" manuell anhängen.\n\n'
-    + '– DB InfraGO AG · ALV KIB';
+  var body = 'Hallo,
 
+'
+    + 'anbei der Bericht zur Erstbeurteilung eines Anfahrschadens.
+
+'
+    + 'Datum:        ' + t + '
+'
+    + 'Bauwerksart:  ' + (D.bw||'-') + '
+'
+    + 'Bewertung:    ' + (cfg.lbl||'-') + '
+
+'
+    + 'Den vollständigen Bericht (inkl. Fotos) finden Sie in der angehängten PDF.
+
+'
+    + '– DB InfraGO AG · ALV KIB';
   window.location.href = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
 }
+
 
 function neu(){
   if(!confirm('Neuen Einsatz starten? Alle Daten werden gelöscht.')) return;
