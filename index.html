@@ -449,7 +449,8 @@ function runPDF(btn) {
         doc.text('Seite '+pg+'/'+np2,192,PH-3,{align:'right'});
       }
 
-      doc.save('Anfahrschaden_'+new Date().toISOString().slice(0,10)+'.pdf');
+      var pdfUrl = doc.output('bloburl');
+      window.open(pdfUrl, '_blank');
       document.getElementById('spinner').className='';
       btn.disabled=false;
     } catch(err) {
