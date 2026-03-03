@@ -253,20 +253,20 @@ function chk(id, val, el) {
 }
 
 var CFG = {
-  G:  { bc:'bred',    lbl:'Gefährdung festgestellt',
+  G:  { bc:'bred',    lbl:'Gefaehrdung festgestellt',
         m:[{t:'Bahnbetrieb sofort einstellen',g:'SOFORT',c:'tred'},
-           {t:'ALV KIB unverzüglich benachrichtigen',g:'SOFORT',c:'tred'},
+           {t:'ALV KIB unverzueglich benachrichtigen',g:'SOFORT',c:'tred'},
            {t:'Unfallstelle sichern und absperren',g:'SOFORT',c:'tred'},
-           {t:'Vollständige Dokumentation erstellen',g:'DOKUMENTIEREN',c:'tblue'}]},
-  E:  { bc:'byellow', lbl:'Einschränkung erforderlich',
-        m:[{t:'Geschwindigkeitsbeschränkung einführen',g:'PRÜFEN',c:'tyellow'},
-           {t:'Strukturelle Prüfung durch Fachmann',g:'PRÜFEN',c:'tyellow'},
+           {t:'Vollstaendige Dokumentation erstellen',g:'DOKUMENTIEREN',c:'tblue'}]},
+  E:  { bc:'byellow', lbl:'Einschraenkung erforderlich',
+        m:[{t:'Geschwindigkeitsbeschraenkung einfuehren',g:'PRUeFEN',c:'tyellow'},
+           {t:'Strukturelle Pruefung durch Fachmann',g:'PRUeFEN',c:'tyellow'},
            {t:'Schadensbild dokumentieren',g:'DOKUMENTIEREN',c:'tblue'},
            {t:'ALV KIB informieren',g:'DOKUMENTIEREN',c:'tblue'}]},
   D2: { bc:'byellow', lbl:'Dokumentation erforderlich',
-        m:[{t:'Schäden vollständig fotografisch dokumentieren',g:'DOKUMENTIEREN',c:'tblue'},
-           {t:'Weiteren Verlauf beobachten',g:'PRÜFEN',c:'tyellow'},
-           {t:'Meldung an ALV KIB zur nachgelagerten Prüfung',g:'DOKUMENTIEREN',c:'tblue'}]},
+        m:[{t:'Schaeden vollstaendig fotografisch dokumentieren',g:'DOKUMENTIEREN',c:'tblue'},
+           {t:'Weiteren Verlauf beobachten',g:'PRUeFEN',c:'tyellow'},
+           {t:'Meldung an ALV KIB zur nachgelagerten Pruefung',g:'DOKUMENTIEREN',c:'tblue'}]},
   U:  { bc:'bgreen',  lbl:'Kein kritischer Befund',
         m:[{t:'Bahnbetrieb kann aufrechterhalten werden',g:'OK',c:'tblue'},
            {t:'Einsatz dokumentieren',g:'DOKUMENTIEREN',c:'tblue'},
@@ -275,17 +275,17 @@ var CFG = {
 
 function doResult() {
   var s = D.sd;
-  var crit = ['Freiliegende Bewehrung','Verformungen','Auffällige Rissbildungen'];
+  var crit = ['Freiliegende Bewehrung','Verformungen','Auffaellige Rissbildungen'];
   var hasCrit = false;
   for (var i=0;i<crit.length;i++) if (s.indexOf(crit[i])!==-1){hasCrit=true;break;}
-  if (D.gl==='Auffällig'||hasCrit) D.res='G';
-  else if (s.indexOf('Größere Abplatzungen')!==-1) D.res='E';
+  if (D.gl==='Auffaellig'||hasCrit) D.res='G';
+  else if (s.indexOf('Groessere Abplatzungen')!==-1) D.res='E';
   else if (s.length>0) D.res='D2';
   else D.res='U';
 
   var cfg = CFG[D.res];
   var h = '<div class="badge '+cfg.bc+'">'+cfg.lbl+'</div>';
-  h += '<div class="card"><div class="ctitle">Empfohlene Maßnahmen</div>';
+  h += '<div class="card"><div class="ctitle">Empfohlene Massnahmen</div>';
   for (var j=0;j<cfg.m.length;j++) {
     h += '<div class="mrow"><div class="mtxt">'+cfg.m[j].t+'<br><span class="mtag '+cfg.m[j].c+'">'+cfg.m[j].g+'</span></div></div>';
   }
@@ -325,7 +325,7 @@ function buildSum(){
   var cfg=CFG[D.res]||{};
   var rows=[
     ['Bauwerksart', D.bw||'-'],
-    ['Schadensbild', D.sd.length ? D.sd.join(', ') : 'Keine Schäden'],
+    ['Schadensbild', D.sd.length ? D.sd.join(', ') : 'Keine Schaeden'],
     ['Gleislage', D.gl||'-'],
     ['Bewertung', cfg.lbl||'-'],
     ['Fotos', D.pics.length+' Foto(s)'],
@@ -336,12 +336,12 @@ function buildSum(){
   document.getElementById('ST').innerHTML=h;
 }
 
-// ── PDF (opens inline on iOS, that's normal) ─────────────
+// -- PDF (opens inline on iOS, that's normal) -------------
 function makePDF() {
   var btn = document.getElementById('PB');
   btn.disabled = true;
   document.getElementById('spinner').className = 'on';
-  document.getElementById('spin-txt').textContent = 'PDF wird erstellt…';
+  document.getElementById('spin-txt').textContent = 'PDF wird erstellt...';
 
   if (window.jspdf && window.jspdf.jsPDF) { runPDF(btn); return; }
   var s = document.createElement('script');
@@ -350,7 +350,7 @@ function makePDF() {
   s.onerror = function() {
     document.getElementById('spinner').className = '';
     btn.disabled = false;
-    alert('PDF benötigt Internet. Bitte WLAN aktivieren.');
+    alert('PDF benoetigt Internet. Bitte WLAN aktivieren.');
   };
   document.head.appendChild(s);
 }
@@ -397,7 +397,7 @@ function runPDF(btn) {
       sec('BAUWERK & SCHADENSBILD');
       row('Bauwerksart', D.bw||'-');
       row('Gleislage', D.gl||'-');
-      row('Schadensbild', D.sd.length?D.sd.join(', '):'Keine Schäden'); y+=4;
+      row('Schadensbild', D.sd.length?D.sd.join(', '):'Keine Schaeden'); y+=4;
 
       sec('EMPFOHLENE MASSNAHMEN');
       for (var i=0;i<cfg.m.length;i++) {
@@ -452,34 +452,25 @@ function runPDF(btn) {
   }, 100);
 }
 
-// ── Mail (separate button, direct tap = iOS allows it) ────
+// -- Mail (separate button, direct tap = iOS allows it) ----
 function openMail() {
   var t = getTS();
   var cfg = CFG[D.res] || { lbl:'-' };
-  var subject = 'Erstbeurteilung Anfahrschaden EÜ – ' + t;
-  var body = 'Hallo,
-
-'
-    + 'anbei der Bericht zur Erstbeurteilung eines Anfahrschadens.
-
-'
-    + 'Datum:        ' + t + '
-'
-    + 'Bauwerksart:  ' + (D.bw||'-') + '
-'
-    + 'Bewertung:    ' + (cfg.lbl||'-') + '
-
-'
-    + 'Den vollständigen Bericht (inkl. Fotos) finden Sie in der angehängten PDF.
-
-'
-    + '– DB InfraGO AG · ALV KIB';
-  window.location.href = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  var subject = 'Erstbeurteilung Anfahrschaden EUe - ' + t;
+  var line1 = 'Hallo,';
+  var line2 = 'anbei der Bericht zur Erstbeurteilung eines Anfahrschadens.';
+  var line3 = 'Datum:        ' + t;
+  var line4 = 'Bauwerksart:  ' + (D.bw||'-');
+  var line5 = 'Bewertung:    ' + (cfg.lbl||'-');
+  var line6 = 'Den vollstaendigen Bericht mit Fotos finden Sie in der angehaengten PDF.';
+  var line7 = '- DB InfraGO AG - ALV KIB';
+  var body = line1 + '%0A%0A' + line2 + '%0A%0A' + line3 + '%0A' + line4 + '%0A' + line5 + '%0A%0A' + line6 + '%0A%0A' + line7;
+  window.location.href = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + body;
 }
 
 
 function neu(){
-  if(!confirm('Neuen Einsatz starten? Alle Daten werden gelöscht.')) return;
+  if(!confirm('Neuen Einsatz starten? Alle Daten werden geloescht.')) return;
   D={bw:null,sd:[],gl:null,res:null,pics:[]};
   document.getElementById('NT').value='';
   var opts=document.querySelectorAll('.opt');
